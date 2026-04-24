@@ -317,6 +317,7 @@ let countdownTime = 0; // counts down from startCountdownSec
 let stunUntil = 0;     // performance.now() timestamp while stunned
 let lastSide = null;   // 'L' or 'R'
 let lastTapTime = -1e9;
+let sameStreak = 0;    // consecutive same-side taps; fall on 3rd
 let tapStamps = [];    // ms timestamps for rolling CPS & cap
 let busZ = CONFIG.busStartZ;
 let missedAnimUntil = 0;
@@ -376,7 +377,7 @@ canvas.addEventListener('pointerdown', (e) => {
   activePointers.set(e.pointerId, side);
   if (blockedPointers.has(e.pointerId)) return;
   if (state !== STATE.RUNNING) return;
-  handleTap(side, true);
+  handleTap(side);
 }, { passive: false });
 
 const releasePointer = (e) => {
@@ -387,7 +388,7 @@ canvas.addEventListener('pointerup', releasePointer);
 canvas.addEventListener('pointercancel', releasePointer);
 canvas.addEventListener('pointerleave', releasePointer);
 
-function handleTap(side, fromTouch) {
+function handleTap(side) {
   const now = performance.now();
 
   // stunned → drop
@@ -397,18 +398,16 @@ function handleTap(side, fromTouch) {
   pruneTapStamps(now);
   if (tapStamps.length >= CONFIG.maxRegisteredCps) return;
 
-  // fault: simultaneous opposite key within window — keyboard only.
-  // On touch, two thumbs naturally land within 40ms of each other when
-  // alternating fast, so this rule would penalise normal mobile play.
-  if (!fromTouch && lastSide && lastSide !== side && (now - lastTapTime) < CONFIG.simultaneousWindowMs) {
-    fall(now);
-    return;
-  }
-
-  // fault: same-key repeat / double-press
+  // fault: tapping the same side three times in a row.
+  // Two consecutive same-side taps still register; the third is the fault.
   if (lastSide === side) {
-    fall(now);
-    return;
+    sameStreak++;
+    if (sameStreak >= 3) {
+      fall(now);
+      return;
+    }
+  } else {
+    sameStreak = 1;
   }
 
   // valid tap
@@ -432,6 +431,7 @@ function fall(now) {
   stunUntil = now + CONFIG.stunMs;
   lastSide = null;
   lastTapTime = -1e9;
+  sameStreak = 0;
   lastFallAt = now;
   playFall();
 }
@@ -468,6 +468,7 @@ function startRun() {
   stunUntil = 0;
   lastSide = null;
   lastTapTime = -1e9;
+  sameStreak = 0;
   tapStamps = [];
   busZ = CONFIG.busStartZ;
   finalResult = null;
