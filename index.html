@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Late for the Bus</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="ui">
+    <div id="title" class="screen">
+      <h1>Late for the Bus</h1>
+      <p class="tag">Granny's late for the 87. Alternate <kbd>&larr;</kbd><kbd>&rarr;</kbd> or <kbd>A</kbd><kbd>D</kbd> &mdash; or tap the left and right halves of the screen &mdash; as fast as you can. Don't double-tap. 100m in 12s.</p>
+      <p id="best"></p>
+      <button id="play">Play</button>
+    </div>
+
+    <div id="result" class="screen hidden">
+      <h2 id="result-head"></h2>
+      <p id="result-body"></p>
+      <p id="result-best"></p>
+      <button id="again">Play again</button>
+    </div>
+
+    <div id="hud" class="hidden">
+      <div id="timer">12.00</div>
+      <div id="tape">
+        <span class="g">👵</span>
+        <div id="tape-track"><div id="tape-fill"></div></div>
+        <span class="b">🚌</span>
+      </div>
+    </div>
+
+    <div id="countdown" class="hidden"></div>
+
+    <div id="debug" class="hidden"></div>
+
+    <button id="mute" aria-label="mute">🔊</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
