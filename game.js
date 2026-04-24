@@ -507,7 +507,7 @@ function endRun(caught) {
     playCatch();
     state = STATE.CAUGHT;
     caughtAnimStart = performance.now();
-    caughtAnimUntil = caughtAnimStart + 1800;
+    caughtAnimUntil = caughtAnimStart + 3500;
     spawnConfetti();
   } else {
     finalResult = { caught: false, spare: 0 };
@@ -547,7 +547,7 @@ function showResult(r, isBest) {
 
   if (r.caught) {
     resultHead.textContent = 'CAUGHT!';
-    resultBody.textContent = `You made it with ${r.spare.toFixed(2)}s to spare. - Granny runs fast world's most!`;
+    resultBody.textContent = `You made it with ${r.spare.toFixed(2)}s to spare.`;
   } else {
     resultHead.textContent = 'MISSED.';
     resultBody.textContent = `The 87 pulls away. You managed ${position.toFixed(1)}m.`;
@@ -986,6 +986,22 @@ function render(dt, now) {
     ctx.strokeText('CAUGHT IT!', 0, 0);
     ctx.fillText('CAUGHT IT!', 0, 0);
     ctx.restore();
+    // catchphrase below, slides in after a beat
+    if (age > 0.4) {
+      const phraseAge = age - 0.4;
+      const phraseAlpha = Math.min(1, phraseAge * 3);
+      ctx.save();
+      ctx.globalAlpha = phraseAlpha;
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#7a4a00';
+      ctx.lineWidth = 4;
+      ctx.font = `700 ${Math.min(W, H) * 0.045}px -apple-system, "Segoe UI", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.strokeText("Granny runs fast world's most!", W * 0.5, H * 0.28 + Math.min(W, H) * 0.09);
+      ctx.fillText("Granny runs fast world's most!", W * 0.5, H * 0.28 + Math.min(W, H) * 0.09);
+      ctx.restore();
+    }
   } else if (state === STATE.MISSED) {
     const age = (now - missedAnimStart) / 1000;
     const slideY = Math.min(1, age * 2) * H * 0.28;
