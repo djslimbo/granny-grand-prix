@@ -399,16 +399,20 @@ function handleTap(side) {
   if (tapStamps.length >= CONFIG.maxRegisteredCps) return;
 
   // fault: tapping the same side three times in a row.
-  // Two consecutive same-side taps still register; the third is the fault.
+  // Same-side taps don't add impulse — they only build the streak.
+  // The third same-side in a row trips granny.
   if (lastSide === side) {
     sameStreak++;
     if (sameStreak >= 3) {
       fall(now);
       return;
     }
-  } else {
-    sameStreak = 1;
+    // record the tap (so streak keeps building) but skip the impulse
+    lastTapTime = now;
+    tapStamps.push(now);
+    return;
   }
+  sameStreak = 1;
 
   // valid tap
   velocity = Math.min(CONFIG.maxVelocity, velocity + CONFIG.impulsePerTapMS);
@@ -606,12 +610,14 @@ function frame(now) {
     debugEl.classList.remove('hidden');
     pruneTapStamps(now);
     debugEl.textContent =
-      `fps  ${fpsDisplay.toFixed(0)}\n` +
-      `vel  ${velocity.toFixed(2)} m/s\n` +
-      `cps  ${tapStamps.length}\n` +
-      `dist ${position.toFixed(2)} m\n` +
-      `t    ${timeLeft.toFixed(2)} s\n` +
-      `st   ${state}`;
+      `fps    ${fpsDisplay.toFixed(0)}\n` +
+      `vel    ${velocity.toFixed(2)} m/s\n` +
+      `cps    ${tapStamps.length}\n` +
+      `dist   ${position.toFixed(2)} m\n` +
+      `t      ${timeLeft.toFixed(2)} s\n` +
+      `last   ${lastSide || '-'}\n` +
+      `streak ${sameStreak}\n` +
+      `st     ${state}`;
   }
 
   requestAnimationFrame(frame);
