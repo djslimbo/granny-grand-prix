@@ -547,7 +547,7 @@ function showResult(r, isBest) {
 
   if (r.caught) {
     resultHead.textContent = 'CAUGHT!';
-    resultBody.textContent = `You made it with ${r.spare.toFixed(2)}s to spare.`;
+    resultBody.textContent = `You made it with ${r.spare.toFixed(2)}s to spare. - Granny runs fast world's most!`;
   } else {
     resultHead.textContent = 'MISSED.';
     resultBody.textContent = `The 87 pulls away. You managed ${position.toFixed(1)}m.`;
