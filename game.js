@@ -376,7 +376,7 @@ canvas.addEventListener('pointerdown', (e) => {
   activePointers.set(e.pointerId, side);
   if (blockedPointers.has(e.pointerId)) return;
   if (state !== STATE.RUNNING) return;
-  handleTap(side);
+  handleTap(side, true);
 }, { passive: false });
 
 const releasePointer = (e) => {
@@ -387,7 +387,7 @@ canvas.addEventListener('pointerup', releasePointer);
 canvas.addEventListener('pointercancel', releasePointer);
 canvas.addEventListener('pointerleave', releasePointer);
 
-function handleTap(side) {
+function handleTap(side, fromTouch) {
   const now = performance.now();
 
   // stunned → drop
@@ -397,8 +397,10 @@ function handleTap(side) {
   pruneTapStamps(now);
   if (tapStamps.length >= CONFIG.maxRegisteredCps) return;
 
-  // fault: simultaneous opposite key within window
-  if (lastSide && lastSide !== side && (now - lastTapTime) < CONFIG.simultaneousWindowMs) {
+  // fault: simultaneous opposite key within window — keyboard only.
+  // On touch, two thumbs naturally land within 40ms of each other when
+  // alternating fast, so this rule would penalise normal mobile play.
+  if (!fromTouch && lastSide && lastSide !== side && (now - lastTapTime) < CONFIG.simultaneousWindowMs) {
     fall(now);
     return;
   }
@@ -825,10 +827,12 @@ function render(dt, now) {
   }
   lamps.sort((a, b) => b - a);
   // base lamp dimensions in "world pixels" — much beefier
-  const LAMP_BASE_H = 650;
-  const LAMP_BASE_ARM = 140;
-  const LAMP_BASE_POLE = 18;
-  const LAMP_BASE_HEAD = 28;
+  // scale lamps to canvas size so they read the same on phone and desktop
+  const lampUnit = Math.min(W, H);
+  const LAMP_BASE_H = lampUnit * 0.62;
+  const LAMP_BASE_ARM = lampUnit * 0.13;
+  const LAMP_BASE_POLE = lampUnit * 0.017;
+  const LAMP_BASE_HEAD = lampUnit * 0.027;
   for (const z of lamps) {
     const y = zToY(z);
     const hw = zToHalfWidth(z);
